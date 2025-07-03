@@ -91,7 +91,7 @@ export default function ReviewJourney() {
   }
 
   return (
-    <Box display={"flex"} flexDirection={"column"}>
+    <Box display={"flex"} flexDirection={"column"} sx={{background:{xs:"black",sm:"white"}}}>
       <Header />
       <VerticalSnapScroll
         items={items}

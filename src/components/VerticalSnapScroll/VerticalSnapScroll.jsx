@@ -82,16 +82,23 @@ export default function VerticalSnapScroll({
     };
 
     const handleTouchEnd = () => {
-      if (isScrollingInnerRef.current) {
-        startY = deltaY = 0;
-        return; // user was scrolling inner content
+      const scrollable = container.querySelector(".scrollable-content");
+      const newDirection = deltaY < 0 ? 1 : -1;
+    
+      if (scrollable) {
+        const stillCanScroll = canScrollFurther(scrollable, -deltaY);
+        if (isScrollingInnerRef.current && stillCanScroll) {
+          // user is scrolling inner content and there *is* still scroll → don’t change card
+          startY = deltaY = 0;
+          return;
+        }
+        // else: user is scrolling inner but already at end → treat as swipe
       }
-
+    
       if (Math.abs(deltaY) > 50 && !isAnimatingRef.current) {
-        const newDirection = deltaY < 0 ? 1 : -1;
         let next = currentIndex + newDirection;
         next = Math.max(0, Math.min(items.length - 1, next));
-
+    
         if (next !== currentIndex) {
           setPrevIndex(currentIndex);
           setCurrentIndex(next);
@@ -101,6 +108,7 @@ export default function VerticalSnapScroll({
       }
       startY = deltaY = 0;
     };
+    
 
     container.addEventListener("touchstart", handleTouchStart, { passive: true });
     container.addEventListener("touchmove", handleTouchMove, { passive: true });

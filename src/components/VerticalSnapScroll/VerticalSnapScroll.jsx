@@ -11,22 +11,14 @@ export default function VerticalSnapScroll({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [prevIndex, setPrevIndex] = useState(0);
   const isAnimatingRef = useRef(false);
+  const isScrollingInnerRef = useRef(false);
 
   const direction = currentIndex > prevIndex ? 1 : -1;
 
   const variants = {
-    enter: (dir) => ({
-      y: dir > 0 ? 100 : -100,
-      opacity: 0,
-    }),
-    center: {
-      y: 0,
-      opacity: 1,
-    },
-    exit: (dir) => ({
-      y: dir > 0 ? -100 : 100,
-      opacity: 0,
-    }),
+    enter: (dir) => ({ y: dir > 0 ? 100 : -100, opacity: 0 }),
+    center: { y: 0, opacity: 1 },
+    exit: (dir) => ({ y: dir > 0 ? -100 : 100, opacity: 0 }),
   };
 
   const canScrollFurther = (el, deltaY) => {
@@ -35,9 +27,9 @@ export default function VerticalSnapScroll({
     const scrollHeight = el.scrollHeight;
     const clientHeight = el.clientHeight;
     if (deltaY > 0) {
-      return scrollTop + clientHeight < scrollHeight;
+      return scrollTop + clientHeight < scrollHeight; // can scroll down
     } else {
-      return scrollTop > 0;
+      return scrollTop > 0; // can scroll up
     }
   };
 
@@ -48,7 +40,7 @@ export default function VerticalSnapScroll({
     const handleWheel = (e) => {
       const scrollable = e.target.closest(".scrollable-content");
       if (scrollable && canScrollFurther(scrollable, e.deltaY)) {
-        return;
+        return; // scroll inner content
       }
 
       e.preventDefault();
@@ -78,34 +70,39 @@ export default function VerticalSnapScroll({
 
     const handleTouchStart = (e) => {
       startY = e.touches[0].clientY;
+      isScrollingInnerRef.current = false;
     };
 
     const handleTouchMove = (e) => {
       deltaY = e.touches[0].clientY - startY;
+      const scrollable = e.target.closest(".scrollable-content");
+      if (scrollable && canScrollFurther(scrollable, -deltaY)) {
+        isScrollingInnerRef.current = true;
+      }
     };
 
     const handleTouchEnd = () => {
-      const newDirection = deltaY < 0 ? 1 : -1;
-      let next = currentIndex + newDirection;
-      next = Math.max(0, Math.min(items.length - 1, next));
-
-      const scrollable = container.querySelector(".scrollable-content");
-      if (scrollable && canScrollFurther(scrollable, -deltaY)) {
-        return;
+      if (isScrollingInnerRef.current) {
+        startY = deltaY = 0;
+        return; // user was scrolling inner content
       }
 
       if (Math.abs(deltaY) > 50 && !isAnimatingRef.current) {
-        setPrevIndex(currentIndex);
-        setCurrentIndex(next);
-        isAnimatingRef.current = true;
-        setTimeout(() => (isAnimatingRef.current = false), 500);
+        const newDirection = deltaY < 0 ? 1 : -1;
+        let next = currentIndex + newDirection;
+        next = Math.max(0, Math.min(items.length - 1, next));
+
+        if (next !== currentIndex) {
+          setPrevIndex(currentIndex);
+          setCurrentIndex(next);
+          isAnimatingRef.current = true;
+          setTimeout(() => (isAnimatingRef.current = false), 500);
+        }
       }
       startY = deltaY = 0;
     };
 
-    container.addEventListener("touchstart", handleTouchStart, {
-      passive: true,
-    });
+    container.addEventListener("touchstart", handleTouchStart, { passive: true });
     container.addEventListener("touchmove", handleTouchMove, { passive: true });
     container.addEventListener("touchend", handleTouchEnd);
 

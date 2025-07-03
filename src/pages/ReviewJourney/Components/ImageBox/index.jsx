@@ -15,7 +15,7 @@ const ImageBox = ({ imgSrc, age, name, date, location }) => {
         height: { xs: "350px", sm: "500px" },
       }}
     >
-      <Box
+      {/* <Box
         width="100%"
         display="flex"
         alignItems="center"
@@ -75,7 +75,7 @@ const ImageBox = ({ imgSrc, age, name, date, location }) => {
             )}
           </Box>
         </Box>
-      </Box>
+      </Box> */}
     </Box>
   );
 };

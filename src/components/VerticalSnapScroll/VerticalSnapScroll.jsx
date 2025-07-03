@@ -135,7 +135,7 @@ export default function VerticalSnapScroll({
           initial="enter"
           animate="center"
           exit="exit"
-          transition={{ duration: 0.5, ease: "easeInOut" }}
+          transition={{ duration: 0.4, ease: "easeInOut" }}
           style={{
             height: "100%",
             width: "100%",

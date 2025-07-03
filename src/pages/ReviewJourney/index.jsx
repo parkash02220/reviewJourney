@@ -3,7 +3,7 @@ import { Box, Grid, Typography } from "@mui/material";
 import { useLocation } from "react-router-dom";
 import useGetJourneyData from "../../hooks/useGetJourneyData";
 import VerticalSnapScroll from "../../components/VerticalSnapScroll";
-import Header from "./Card/Header";
+import Header from "./Components/Header";
 import Loader from "../../components/Loader/Loader";
 import SingleStepCard from "./SingleStepCard";
 

@@ -41,6 +41,13 @@ export default function SingleStepCard({ summary, user, step, isFirstStep }) {
         flex="1 1 auto"
         overflow="auto"
         minHeight={0}
+        sx={{
+          scrollbarWidth: 'none', 
+          msOverflowStyle: 'none', 
+          '&::-webkit-scrollbar': {
+            display: 'none', 
+          },
+        }}
       >
         {step.img && (
           <ImageBox

@@ -6,13 +6,13 @@ const ImageBox = ({ imgSrc, age, name, date, location }) => {
   return (
     <Box
       width="100%"
-      height="500px"
       sx={{
         backgroundImage: `url(${imgSrc})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
         display: "flex",
         alignItems: "flex-end",
+        height: { xs: "350px", sm: "500px" },
       }}
     >
       <Box

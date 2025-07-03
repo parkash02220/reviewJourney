@@ -1,13 +1,39 @@
+import { useEffect, useRef, useMemo } from "react";
 import { Box, Typography } from "@mui/material";
-import DecisionCard from "../Components/DecisionCard";
-import ImageBox from "../Components/ImageBox";
-import HobbiesTags from "../Components/HobbiesTags";
-import ProgressHeader from "../Components/ProgressHeader";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import { useMemo } from "react";
-export default function SingleStepCard({ summary, user, step, isFirstStep }) {
+import ProgressHeader from "../Components/ProgressHeader";
+import ImageBox from "../Components/ImageBox";
+// import DecisionCard from "../Components/DecisionCard";
+// import HobbiesTags from "../Components/HobbiesTags";
+
+export default function SingleStepCard({
+  summary,
+  user,
+  step,
+  isFirstStep,
+  onReachTop,
+  onReachBottom,
+}) {
+  const scrollableRef = useRef();
+
+  useEffect(() => {
+    const el = scrollableRef.current;
+    if (!el) return;
+
+    const handleScroll = () => {
+      if (el.scrollTop <= 10) {
+        onReachTop?.();
+      } else if (el.scrollTop + el.clientHeight >= el.scrollHeight - 10) {
+        onReachBottom?.();
+      }
+    };
+
+    el.addEventListener("scroll", handleScroll);
+    return () => el.removeEventListener("scroll", handleScroll);
+  }, [onReachTop, onReachBottom]);
+
   const date = useMemo(() => {
     return step.timestamp
       ? new Date(step.timestamp).toLocaleDateString("en-US", {
@@ -17,81 +43,61 @@ export default function SingleStepCard({ summary, user, step, isFirstStep }) {
         })
       : "";
   }, [step]);
+
   return (
     <Box
       display="flex"
       flexDirection="column"
       height="100%"
-      bgcolor={"black"}
+      bgcolor="black"
       gap={2}
     >
       {/* {isFirstStep && (
         <Box flex="0 0 auto">
-          <DecisionCard
-            age={summary?.at_age}
-            msg={summary[summary?.user_action]}
-          />
+          <DecisionCard age={summary?.at_age} msg={summary[summary?.user_action]} />
         </Box>
       )} */}
 
       <ProgressHeader />
 
       <Box
+        ref={scrollableRef}
         className="scrollable-content"
         flex="1 1 auto"
         overflow="auto"
         minHeight={0}
         sx={{
-          scrollbarWidth: 'none', 
-          msOverflowStyle: 'none', 
-          '&::-webkit-scrollbar': {
-            display: 'none', 
-          },
+          scrollbarWidth: "none",
+          msOverflowStyle: "none",
+          "&::-webkit-scrollbar": { display: "none" },
         }}
       >
-        {step.img && (
-          <ImageBox
-            imgSrc={step.img}
-            // age={summary?.at_age}
-            // location={step.location}
-            // name={user?.name}
-            // date={
-            //   step.timestamp
-            //     ? new Date(step.timestamp).toLocaleDateString("en-US", {
-            //         year: "numeric",
-            //         month: "long",
-            //         day: "numeric",
-            //       })
-            //     : ""
-            // }
-          />
-        )}
+        {step.img && <ImageBox imgSrc={step.img} />}
 
         {/* {isFirstStep && <HobbiesTags hobbies={user?.hobbies} />} */}
 
         <Box
           mt={4}
-          display={"flex"}
-          flexDirection={"column"}
+          display="flex"
+          flexDirection="column"
           gap={1}
-          justifyContent={"flex-start"}
           paddingInline={2}
         >
           {(user?.name || user?.age) && (
-            <Box display={"flex"} alignItems={"center"} gap={1}>
+            <Box display="flex" alignItems="center" gap={1}>
               <AccountCircleIcon sx={{ color: "green", fontSize: 20 }} />
-              <Typography color="#FFFFFF" fontWeight={700} fontSize={18}>{`${user?.name || ""}, ${
-                user?.age || ""
-              }`}</Typography>
+              <Typography color="#FFFFFF" fontWeight={700} fontSize={18}>
+                {`${user?.name || ""}, ${user?.age || ""}`}
+              </Typography>
             </Box>
           )}
           <Box
-            display={"flex"}
-            alignItems={"center"}
-            justifyContent={"space-between"}
+            display="flex"
+            alignItems="center"
+            justifyContent="space-between"
           >
             {step?.location && (
-              <Box display={"flex"} alignItems={"center"} gap={1}>
+              <Box display="flex" alignItems="center" gap={1}>
                 <LocationOnIcon sx={{ color: "green", fontSize: 16 }} />
                 <Typography color="#FFFFFF" fontSize={14}>
                   {step?.location || ""}
@@ -99,13 +105,11 @@ export default function SingleStepCard({ summary, user, step, isFirstStep }) {
               </Box>
             )}
             {date && (
-              <Box display={"flex"} alignItems={"center"} gap={1}>
-                <Box display="flex" alignItems="center" gap={1}>
-                  <AccessTimeIcon sx={{ color: "green", fontSize: 16 }} />
-                  <Typography fontSize={14} color="#FFFFFF">
-                    {date || ""}
-                  </Typography>
-                </Box>
+              <Box display="flex" alignItems="center" gap={1}>
+                <AccessTimeIcon sx={{ color: "green", fontSize: 16 }} />
+                <Typography fontSize={14} color="#FFFFFF">
+                  {date || ""}
+                </Typography>
               </Box>
             )}
           </Box>

@@ -1,4 +1,4 @@
-import { Box, Typography } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import DecisionCard from "../Components/DecisionCard";
 import ImageBox from "../Components/ImageBox";
 import HobbiesTags from "../Components/HobbiesTags";
@@ -6,7 +6,7 @@ import ProgressHeader from "../Components/ProgressHeader";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 export default function SingleStepCard({
   summary,
   user,
@@ -15,6 +15,10 @@ export default function SingleStepCard({
   bottomeRef,
   topRef,
 }) {
+  const [showMore, setShowMore] = useState(true);
+  const toggleShowMore = () => {
+    setShowMore((pre) => !pre);
+  };
   const date = useMemo(() => {
     return step.timestamp
       ? new Date(step.timestamp).toLocaleDateString("en-US", {
@@ -97,9 +101,28 @@ export default function SingleStepCard({
 
         {step.event && (
           <Box paddingInline={2}>
-            <Typography fontSize={14} color="#FFFFFF">
+            {showMore ? (
+              <Box>
+                <Typography fontSize={14} color="#FFFFFF">
+                  {step.event?.slice(0, 100)}...
+                </Typography>
+                <Button onClick={toggleShowMore} sx={{ fontSize: 14,p:0,color:"#FFFFFF",textTransform:'none' }}>
+                  see more
+                </Button>
+              </Box>
+            ) : (
+              <Box>
+               <Typography fontSize={14} color="#FFFFFF">
+                  {step.event}
+                </Typography>
+                <Button onClick={toggleShowMore} sx={{ fontSize: 14,p:0,color:"#FFFFFF",textTransform:'none' }}>
+                  see more
+                </Button>
+              </Box>
+            )}
+            {/* <Typography fontSize={14} color="#FFFFFF">
               {step.event}
-            </Typography>
+            </Typography> */}
           </Box>
         )}
         <Box ref={bottomeRef} sx={{ height: "2px", width: "100%" }} />

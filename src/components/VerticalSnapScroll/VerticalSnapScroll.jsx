@@ -48,20 +48,28 @@ export default function VerticalSnapScroll({
     if (!container) return;
 
     const handleWheel = (e) => {
-      const scrollable = container.querySelector(".scrollable-content");
-      if (scrollable && canScrollFurther(scrollable, e.deltaY)) return;
-
-      if (e.cancelable) e.preventDefault();
       if (isAnimatingRef.current) return;
-
+    
+      const scrollable = container.querySelector(".scrollable-content");
       const newDirection = e.deltaY > 0 ? 1 : -1;
 
-      if (newDirection > 0) {
-        if (bottomInView) snapToIndex(currentIndex + newDirection);
+      if (scrollable && scrollable.contains(e.target)) {
+        if (canScrollFurther(scrollable, e.deltaY)) {
+          return;
+        } else {
+          if (e.cancelable) e.preventDefault();
+          if (newDirection > 0) {
+            if (bottomInView) snapToIndex(currentIndex + 1);
+          } else {
+            if (topInView) snapToIndex(currentIndex - 1);
+          }
+        }
       } else {
-        if (topInView) snapToIndex(currentIndex + newDirection);
+        if (e.cancelable) e.preventDefault();
+        snapToIndex(currentIndex + newDirection);
       }
     };
+    
 
     container.addEventListener("wheel", handleWheel, { passive: false });
     return () => container.removeEventListener("wheel", handleWheel);

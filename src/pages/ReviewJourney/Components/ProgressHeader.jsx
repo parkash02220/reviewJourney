@@ -12,7 +12,7 @@ export default function ProgressHeader() {
       sx={{
         display: "flex",
         gap: 3,
-        padding: 2,
+        padding: {xs:'4px',sm:2},
         justifyContent: "center",
         alignItems: "center",
       }}

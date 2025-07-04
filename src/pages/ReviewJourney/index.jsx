@@ -102,7 +102,7 @@ export default function ReviewJourney() {
         renderItem={(item, index, bottomeRef, topRef) => (
           <Grid
             container
-            spacing={2}
+            spacing={{xs:0,sm:2}}
             sx={{
               height: "100%",
             }}

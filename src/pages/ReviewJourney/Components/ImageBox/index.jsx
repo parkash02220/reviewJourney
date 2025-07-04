@@ -1,28 +1,42 @@
-import { Box, Typography } from "@mui/material";
-import { AiOutlineClockCircle } from "react-icons/ai";
-import { MdLocationOn } from "react-icons/md";
+import { Box } from "@mui/material";
 
-const ImageBox = ({ imgSrc, name }) => {
-  return (
+const ImageBox = ({ imgSrc, name }) => (
+  <Box
+    width="100%"
+    sx={{
+      aspectRatio: "1 / 1",
+      position: "relative",
+      overflow: "hidden",
+    }}
+  >
     <Box
-      width="100%"
+      component="img"
+      src={imgSrc}
+      alt=""
+      aria-hidden
       sx={{
-        aspectRatio: "1 / 1",
-        position: "relative",
+        position: "absolute",
+        top: 0,
+        left: 0,
+        width: "100%",
+        height: "100%",
+        objectFit: "cover",
+        filter: "blur(12px)",
+        transform: "scale(1.1)",
       }}
-    >
-      <Box
-        component="img"
-        src={imgSrc}
-        alt={name || "image"}
-        sx={{
-          width: "100%",
-          height: "100%",
-          objectFit: "contain",
-        }}
-      />
-    </Box>
-  );
-};
+    />
+    <Box
+      component="img"
+      src={imgSrc}
+      alt={name || "image"}
+      sx={{
+        position: "relative",
+        width: "100%",
+        height: "100%",
+        objectFit: "contain",
+      }}
+    />
+  </Box>
+);
 
 export default ImageBox;

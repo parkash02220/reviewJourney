@@ -4,7 +4,7 @@ import { AiOutlineArrowLeft } from "react-icons/ai";
 const Header = () => {
   return (
     <>
-      <Grid container spacing={2}>
+      <Grid container  spacing={{xs:0,sm:2}}>
         <Grid size={{ xs: 0, sm: 1, md: 2, lg: 3, xl: 4 }}></Grid>
         <Grid size={{ xs: 12, sm: 10, md: 8, lg: 6, xl: 4 }}>
           <Box

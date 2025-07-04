@@ -56,7 +56,7 @@ export default function ReviewJourney() {
     return (
       <Box
         width="100vw"
-        height="100vh"
+        height="100dvh"
         display="flex"
         justifyContent="center"
         alignItems="center"
@@ -74,7 +74,7 @@ export default function ReviewJourney() {
 
   if (loading || !hasFetchedDataOnce) {
     return (
-      <Box width="100vw" height="100vh">
+      <Box width="100vw" height="100dvh">
         <Loader />
       </Box>
     );
@@ -82,7 +82,7 @@ export default function ReviewJourney() {
 
   if (!loading && hasFetchedDataOnce && items.length === 0) {
     return (
-      <Box width="100vw" height="100vh">
+      <Box width="100vw" height="100dvh">
         <Typography fontSize={24} fontWeight={800}>
           No data to show...
         </Typography>
@@ -100,10 +100,7 @@ export default function ReviewJourney() {
             container
             spacing={2}
             sx={{
-              height: "calc(100vh - 56px)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
+              height: "100%",
             }}
           >
             <Grid size={{ xs: 0, sm: 1, md: 2, lg: 3, xl: 4 }}></Grid>
@@ -122,9 +119,9 @@ export default function ReviewJourney() {
           </Grid>
         )}
         onIndexChange={(index) => console.log("Visible index:", index)}
-        // containerSx={{
-        //   height: "calc(100dvh - 56px)",
-        // }}
+        containerSx={{
+          height: "calc(100dvh - 56px)",
+        }}
       />
     </Box>
   );

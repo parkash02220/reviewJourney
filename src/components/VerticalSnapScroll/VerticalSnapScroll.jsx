@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from "react";
 import { Box } from "@mui/material";
 import { AnimatePresence, motion } from "framer-motion";
+import { useInView } from "react-intersection-observer";
 
 export default function VerticalSnapScroll({
   items = [],
@@ -12,6 +13,9 @@ export default function VerticalSnapScroll({
   const [prevIndex, setPrevIndex] = useState(0);
   const isAnimatingRef = useRef(false);
   const isScrollingInnerRef = useRef(false);
+
+  // Intersection observer to know if bottom sentinel is visible
+  const { ref: bottomRef, inView } = useInView({ threshold: 0.1 });
 
   const direction = currentIndex > prevIndex ? 1 : -1;
 
@@ -25,8 +29,8 @@ export default function VerticalSnapScroll({
     if (!el) return false;
     const { scrollTop, scrollHeight, clientHeight } = el;
     return deltaY > 0
-      ? scrollTop + clientHeight < scrollHeight
-      : scrollTop > 0;
+      ? scrollTop + clientHeight < scrollHeight // can scroll down
+      : scrollTop > 0;                          // can scroll up
   };
 
   const snapToIndex = (next) => {
@@ -39,6 +43,7 @@ export default function VerticalSnapScroll({
     }
   };
 
+  /** Handle wheel (desktop) */
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -51,25 +56,32 @@ export default function VerticalSnapScroll({
       if (isAnimatingRef.current) return;
 
       const newDirection = e.deltaY > 0 ? 1 : -1;
-      snapToIndex(currentIndex + newDirection);
+
+      // If going to next card, require bottomRef inView
+      if (newDirection > 0) {
+        if (inView) snapToIndex(currentIndex + newDirection);
+      } else {
+        snapToIndex(currentIndex + newDirection);
+      }
     };
 
     container.addEventListener("wheel", handleWheel, { passive: false });
     return () => container.removeEventListener("wheel", handleWheel);
-  }, [currentIndex, items.length]);
+  }, [currentIndex, items.length, inView]);
 
+  /** Handle touch (mobile) */
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
     let startY = 0;
     let deltaY = 0;
-    let startTime = 0; // NEW
+    let startTime = 0;
 
     const handleTouchStart = (e) => {
       startY = e.touches[0].clientY;
       deltaY = 0;
-      startTime = Date.now(); // NEW
+      startTime = Date.now();
       isScrollingInnerRef.current = false;
     };
 
@@ -89,23 +101,26 @@ export default function VerticalSnapScroll({
 
     const handleTouchEnd = () => {
       const endTime = Date.now();
-      const duration = (endTime - startTime) / 1000; // in seconds
-      const velocity = deltaY / duration; // px/sec
-
+      const duration = (endTime - startTime) / 1000;
+      const velocity = deltaY / duration;
       const newDirection = deltaY < 0 ? 1 : -1;
 
-      // quick flick → velocity threshold (absolute)
       const fastFlick = Math.abs(velocity) > 1000;
-      // slow swipe → distance threshold
       const longSwipe = Math.abs(deltaY) > 50;
 
-      if ((fastFlick || longSwipe) && !isAnimatingRef.current) {
-        snapToIndex(currentIndex + newDirection);
+      if (!isAnimatingRef.current && (fastFlick || longSwipe)) {
+        if (newDirection > 0) {
+          // going down → only if bottomRef inView
+          if (inView) snapToIndex(currentIndex + newDirection);
+        } else {
+          snapToIndex(currentIndex + newDirection);
+        }
       }
 
       startY = 0;
       deltaY = 0;
       startTime = 0;
+      isScrollingInnerRef.current = false;
     };
 
     container.addEventListener("touchstart", handleTouchStart, { passive: true });
@@ -117,7 +132,7 @@ export default function VerticalSnapScroll({
       container.removeEventListener("touchmove", handleTouchMove);
       container.removeEventListener("touchend", handleTouchEnd);
     };
-  }, [currentIndex, items.length]);
+  }, [currentIndex, items.length, inView]);
 
   return (
     <Box
@@ -146,9 +161,11 @@ export default function VerticalSnapScroll({
             position: "absolute",
             top: 0,
             left: 0,
+            overflow:'hidden',
           }}
         >
-          {renderItem(items[currentIndex], currentIndex)}
+          {/* Pass bottomRef to content: place it at the end of scrollable content */}
+          {renderItem(items[currentIndex], currentIndex, bottomRef)}
         </motion.div>
       </AnimatePresence>
     </Box>

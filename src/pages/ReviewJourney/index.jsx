@@ -99,7 +99,7 @@ export default function ReviewJourney() {
       <Header />
       <VerticalSnapScroll
         items={items}
-        renderItem={(item, index) => (
+        renderItem={(item, index,bottomeRef) => (
           <Grid
             container
             spacing={2}
@@ -110,13 +110,14 @@ export default function ReviewJourney() {
             <Grid size={{ xs: 0, sm: 1, md: 2, lg: 3, xl: 4 }}></Grid>
             <Grid
               size={{ xs: 12, sm: 10, md: 8, lg: 6, xl: 4 }}
-              height={"100%"}
+              height={'100%'}
             >
               <SingleStepCard
                 summary={item.summary}
                 user={item.user}
                 step={item.step}
                 isFirstStep={item.indexInSummary === 0}
+                bottomeRef={bottomeRef}
               />
             </Grid>
             <Grid size={{ xs: 0, sm: 1, md: 2, lg: 3, xl: 4 }}></Grid>

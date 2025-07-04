@@ -7,7 +7,7 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import { useMemo } from "react";
-export default function SingleStepCard({ summary, user, step, isFirstStep }) {
+export default function SingleStepCard({ summary, user, step, isFirstStep,bottomeRef }) {
   const date = useMemo(() => {
     return step.timestamp
       ? new Date(step.timestamp).toLocaleDateString("en-US", {
@@ -19,38 +19,29 @@ export default function SingleStepCard({ summary, user, step, isFirstStep }) {
   }, [step]);
   return (
     <Box
-      display="flex"
-      flexDirection="column"
-      height="100%"
-      minHeight={0} 
-      bgcolor={"black"}
-      gap={2}
-    >
-      {/* {isFirstStep && (
-        <Box flex="0 0 auto">
-          <DecisionCard
-            age={summary?.at_age}
-            msg={summary[summary?.user_action]}
-          />
-        </Box>
-      )} */}
-
+    display="flex"
+    flexDirection="column"
+    height="100%"
+    minHeight={0}
+    bgcolor="black"
+    pb={2}
+  >
+    <Box flex="0 0 auto">
       <ProgressHeader />
-
-      <Box
-        className="scrollable-content"
-        flex="1 1 auto"
-        overflow="auto"
-        minHeight={0}
-        sx={{
-          paddingBottom: 'calc(env(safe-area-inset-bottom) + 16px)',
-          scrollbarWidth: 'none', 
-          msOverflowStyle: 'none', 
-          '&::-webkit-scrollbar': {
-            display: 'none', 
-          },
-        }}
-      >
+    </Box>
+  
+    <Box
+      className="scrollable-content"
+      flex="1 1 auto"
+      minHeight={0}
+      overflow="auto"
+      sx={{
+        paddingBottom: 'calc(env(safe-area-inset-bottom) + 16px)',
+        scrollbarWidth: 'none',
+        msOverflowStyle: 'none',
+        '&::-webkit-scrollbar': { display: 'none' },
+      }}
+    >
         {step.img && (
           <ImageBox
             imgSrc={step.img}
@@ -120,6 +111,7 @@ export default function SingleStepCard({ summary, user, step, isFirstStep }) {
               </Typography>
           </Box>
         )}
+        <Box ref={bottomeRef} sx={{ height: '10px', bgcolor: 'red', width: '100%' }} />
       </Box>
     </Box>
   );

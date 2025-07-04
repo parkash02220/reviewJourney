@@ -114,11 +114,9 @@ export default function SingleStepCard({ summary, user, step, isFirstStep }) {
 
         {step.event && (
           <Box paddingInline={2}>
-            <Box p={1} borderRadius={2}>
               <Typography fontSize={14} color="#FFFFFF" pb={2}>
                 {step.event}
               </Typography>
-            </Box>
           </Box>
         )}
       </Box>

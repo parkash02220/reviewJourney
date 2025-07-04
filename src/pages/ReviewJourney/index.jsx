@@ -56,7 +56,7 @@ export default function ReviewJourney() {
     return (
       <Box
         width="100vw"
-        height="100dvh"
+        height="100vh"
         display="flex"
         justifyContent="center"
         alignItems="center"
@@ -74,7 +74,7 @@ export default function ReviewJourney() {
 
   if (loading || !hasFetchedDataOnce) {
     return (
-      <Box width="100vw" height="100dvh">
+      <Box width="100vw" height="100vh">
         <Loader />
       </Box>
     );
@@ -82,7 +82,7 @@ export default function ReviewJourney() {
 
   if (!loading && hasFetchedDataOnce && items.length === 0) {
     return (
-      <Box width="100vw" height="100dvh">
+      <Box width="100vw" height="100vh">
         <Typography fontSize={24} fontWeight={800}>
           No data to show...
         </Typography>
@@ -100,7 +100,7 @@ export default function ReviewJourney() {
             container
             spacing={2}
             sx={{
-              height: "calc(100dvh - 56px)",
+              height: "calc(100vh - 56px)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",

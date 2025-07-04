@@ -9,7 +9,7 @@ import { Route, Routes } from "react-router-dom";
 function App() {
   return (
     <>
-      <Box className="main__container" width={"100vw"} minHeight={"100dvh"}>
+      <Box className="main__container" width={"100vw"} minHeight={"100vh"}>
         <Routes>
           <Route path="/" element={<ReviewJourney />} />
         </Routes>

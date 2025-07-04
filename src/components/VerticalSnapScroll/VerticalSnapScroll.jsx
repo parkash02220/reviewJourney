@@ -14,7 +14,6 @@ export default function VerticalSnapScroll({
   const isAnimatingRef = useRef(false);
   const isScrollingInnerRef = useRef(false);
 
-  // Intersection observer to know if bottom sentinel is visible
   const { ref: bottomRef, inView: bottomInView } = useInView({
     threshold: 0.1,
   });
@@ -31,9 +30,7 @@ export default function VerticalSnapScroll({
   const canScrollFurther = (el, deltaY) => {
     if (!el) return false;
     const { scrollTop, scrollHeight, clientHeight } = el;
-    return deltaY > 0
-      ? scrollTop + clientHeight < scrollHeight // can scroll down
-      : scrollTop > 0; // can scroll up
+    return deltaY > 0 ? scrollTop + clientHeight < scrollHeight : scrollTop > 0;
   };
 
   const snapToIndex = (next) => {
@@ -46,7 +43,6 @@ export default function VerticalSnapScroll({
     }
   };
 
-  /** Handle wheel (desktop) */
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -60,7 +56,6 @@ export default function VerticalSnapScroll({
 
       const newDirection = e.deltaY > 0 ? 1 : -1;
 
-      // If going to next card, require bottomRef inView
       if (newDirection > 0) {
         if (bottomInView) snapToIndex(currentIndex + newDirection);
       } else {
@@ -70,9 +65,8 @@ export default function VerticalSnapScroll({
 
     container.addEventListener("wheel", handleWheel, { passive: false });
     return () => container.removeEventListener("wheel", handleWheel);
-  }, [currentIndex, items.length, bottomInView,topInView]);
+  }, [currentIndex, items.length, bottomInView, topInView]);
 
-  /** Handle touch (mobile) */
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -138,7 +132,7 @@ export default function VerticalSnapScroll({
       container.removeEventListener("touchmove", handleTouchMove);
       container.removeEventListener("touchend", handleTouchEnd);
     };
-  }, [currentIndex, items.length, bottomInView,topInView]);
+  }, [currentIndex, items.length, bottomInView, topInView]);
 
   return (
     <Box
@@ -170,7 +164,6 @@ export default function VerticalSnapScroll({
             overflow: "hidden",
           }}
         >
-          {/* Pass bottomRef to content: place it at the end of scrollable content */}
           {renderItem(items[currentIndex], currentIndex, bottomRef, topRef)}
         </motion.div>
       </AnimatePresence>

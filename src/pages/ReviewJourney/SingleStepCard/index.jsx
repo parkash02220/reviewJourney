@@ -7,7 +7,14 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import { useMemo } from "react";
-export default function SingleStepCard({ summary, user, step, isFirstStep,bottomeRef,topRef }) {
+export default function SingleStepCard({
+  summary,
+  user,
+  step,
+  isFirstStep,
+  bottomeRef,
+  topRef,
+}) {
   const date = useMemo(() => {
     return step.timestamp
       ? new Date(step.timestamp).toLocaleDateString("en-US", {
@@ -19,50 +26,32 @@ export default function SingleStepCard({ summary, user, step, isFirstStep,bottom
   }, [step]);
   return (
     <Box
-    display="flex"
-    flexDirection="column"
-    height="100%"
-    minHeight={0}
-    bgcolor="black"
-    pb={5}
-  >
-    <Box flex="0 0 auto">
-      <ProgressHeader />
-    </Box>
-  
-    <Box
-      className="scrollable-content"
-      flex="1 1 auto"
+      display="flex"
+      flexDirection="column"
+      height="100%"
       minHeight={0}
-      overflow="auto"
-      sx={{
-        paddingBottom: 'calc(env(safe-area-inset-bottom) + 16px)',
-        scrollbarWidth: 'none',
-        msOverflowStyle: 'none',
-        '&::-webkit-scrollbar': { display: 'none' },
-      }}
+      bgcolor="black"
+      pb={4}
     >
-        <Box ref={topRef} sx={{ height: '10px', bgcolor: 'red', width: '100%' }} />
+      <Box flex="0 0 auto">
+        <ProgressHeader />
+      </Box>
 
-        {step.img && (
-          <ImageBox
-            imgSrc={step.img}
-            // age={summary?.at_age}
-            // location={step.location}
-            // name={user?.name}
-            // date={
-            //   step.timestamp
-            //     ? new Date(step.timestamp).toLocaleDateString("en-US", {
-            //         year: "numeric",
-            //         month: "long",
-            //         day: "numeric",
-            //       })
-            //     : ""
-            // }
-          />
-        )}
+      <Box
+        className="scrollable-content"
+        flex="1 1 auto"
+        minHeight={0}
+        overflow="auto"
+        sx={{
+          paddingBottom: "calc(env(safe-area-inset-bottom) + 16px)",
+          scrollbarWidth: "none",
+          msOverflowStyle: "none",
+          "&::-webkit-scrollbar": { display: "none" },
+        }}
+      >
+        <Box ref={topRef} sx={{ height: "2px", width: "100%" }} />
 
-        {/* {isFirstStep && <HobbiesTags hobbies={user?.hobbies} />} */}
+        {step.img && <ImageBox imgSrc={step.img} name={user?.name} />}
 
         <Box
           mt={4}
@@ -75,9 +64,9 @@ export default function SingleStepCard({ summary, user, step, isFirstStep,bottom
           {(user?.name || user?.age) && (
             <Box display={"flex"} alignItems={"center"} gap={1}>
               <AccountCircleIcon sx={{ color: "green", fontSize: 20 }} />
-              <Typography color="#FFFFFF" fontWeight={700} fontSize={18}>{`${user?.name || ""}, ${
-                user?.age || ""
-              }`}</Typography>
+              <Typography color="#FFFFFF" fontWeight={700} fontSize={18}>{`${
+                user?.name || ""
+              }, ${user?.age || ""}`}</Typography>
             </Box>
           )}
           <Box
@@ -108,12 +97,12 @@ export default function SingleStepCard({ summary, user, step, isFirstStep,bottom
 
         {step.event && (
           <Box paddingInline={2}>
-              <Typography fontSize={14} color="#FFFFFF">
-                {step.event}
-              </Typography>
+            <Typography fontSize={14} color="#FFFFFF">
+              {step.event}
+            </Typography>
           </Box>
         )}
-        <Box ref={bottomeRef} sx={{ height: '10px', bgcolor: 'red', width: '100%' }} />
+        <Box ref={bottomeRef} sx={{ height: "2px", width: "100%" }} />
       </Box>
     </Box>
   );

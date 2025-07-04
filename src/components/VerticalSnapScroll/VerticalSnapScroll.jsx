@@ -61,63 +61,67 @@ export default function VerticalSnapScroll({
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
-
+  
     let startY = 0;
     let deltaY = 0;
-    let startTime = 0; // NEW
-
+    let startTime = 0;
+  
     const handleTouchStart = (e) => {
       startY = e.touches[0].clientY;
       deltaY = 0;
-      startTime = Date.now(); // NEW
+      startTime = Date.now();
       isScrollingInnerRef.current = false;
     };
-
+  
     const handleTouchMove = (e) => {
       deltaY = e.touches[0].clientY - startY;
       const scrollable = container.querySelector(".scrollable-content");
-
+  
       if (scrollable && canScrollFurther(scrollable, -deltaY)) {
         isScrollingInnerRef.current = true;
-        return;
+        return; // let inner scroll happen
       }
-
+  
       if (!isScrollingInnerRef.current && e.cancelable) {
-        e.preventDefault();
+        e.preventDefault(); // block native to enable swipe
       }
     };
-
+  
     const handleTouchEnd = () => {
       const endTime = Date.now();
-      const duration = (endTime - startTime) / 1000; // in seconds
-      const velocity = deltaY / duration; // px/sec
-
+      const duration = (endTime - startTime) / 1000; // seconds
+      const velocity = deltaY / duration;
       const newDirection = deltaY < 0 ? 1 : -1;
-
-      // quick flick → velocity threshold (absolute)
+  
       const fastFlick = Math.abs(velocity) > 1000;
-      // slow swipe → distance threshold
       const longSwipe = Math.abs(deltaY) > 50;
-
+  
+      const scrollable = container.querySelector(".scrollable-content");
+      const innerCanStillScroll = scrollable ? canScrollFurther(scrollable, -deltaY) : false;
+  
       if ((fastFlick || longSwipe) && !isAnimatingRef.current) {
-        snapToIndex(currentIndex + newDirection);
+        if (!innerCanStillScroll) {
+          snapToIndex(currentIndex + newDirection);
+        }
+        // else: user was still able to scroll → don’t snap
       }
-
+  
       startY = 0;
       deltaY = 0;
       startTime = 0;
     };
-
+  
     container.addEventListener("touchstart", handleTouchStart, { passive: true });
     container.addEventListener("touchmove", handleTouchMove, { passive: false });
     container.addEventListener("touchend", handleTouchEnd);
-
+  
     return () => {
       container.removeEventListener("touchstart", handleTouchStart);
       container.removeEventListener("touchmove", handleTouchMove);
       container.removeEventListener("touchend", handleTouchEnd);
     };
   }, [currentIndex, items.length]);
+  
 
   return (
     <Box

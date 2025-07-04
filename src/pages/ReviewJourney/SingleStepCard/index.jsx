@@ -15,7 +15,7 @@ export default function SingleStepCard({
   bottomeRef,
   topRef,
 }) {
-  const [showMore, setShowMore] = useState(true);
+  const [showMore, setShowMore] = useState(false);
   const toggleShowMore = () => {
     setShowMore((pre) => !pre);
   };
@@ -99,30 +99,26 @@ export default function SingleStepCard({
           </Box>
         </Box>
 
-        {step.event && (
-          <Box paddingInline={2}>
-            {showMore ? (
-              <Box>
-                <Typography fontSize={14} color="#FFFFFF">
-                  {step.event?.slice(0, 100)}...
-                </Typography>
-                <Button onClick={toggleShowMore} sx={{ fontSize: 14,p:0,color:"#FFFFFF",textTransform:'none' }}>
-                  see more
-                </Button>
-              </Box>
-            ) : (
-              <Box>
-               <Typography fontSize={14} color="#FFFFFF">
-                  {step.event}
-                </Typography>
-                <Button onClick={toggleShowMore} sx={{ fontSize: 14,p:0,color:"#FFFFFF",textTransform:'none' }}>
-                  see more
-                </Button>
-              </Box>
+        {step?.event && (
+          <Box paddingInline={2} mt={2}>
+            <Typography fontSize={14} color="#FFFFFF">
+              {showMore || step.event.length <= 100
+                ? step.event
+                : `${step.event.slice(0, 100)}...`}
+            </Typography>
+            {step.event.length > 100 && (
+              <Button
+                onClick={toggleShowMore}
+                sx={{
+                  fontSize: 14,
+                  p: 0,
+                  color: "#FFFFFF",
+                  textTransform: "none",
+                }}
+              >
+                {showMore ? "See less" : "See more"}
+              </Button>
             )}
-            {/* <Typography fontSize={14} color="#FFFFFF">
-              {step.event}
-            </Typography> */}
           </Box>
         )}
         <Box ref={bottomeRef} sx={{ height: "2px", width: "100%" }} />

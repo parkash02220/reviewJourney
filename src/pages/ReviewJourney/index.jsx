@@ -122,9 +122,9 @@ export default function ReviewJourney() {
           </Grid>
         )}
         onIndexChange={(index) => console.log("Visible index:", index)}
-        containerSx={{
-          height: "calc(100dvh - 56px)",
-        }}
+        // containerSx={{
+        //   height: "calc(100dvh - 56px)",
+        // }}
       />
     </Box>
   );

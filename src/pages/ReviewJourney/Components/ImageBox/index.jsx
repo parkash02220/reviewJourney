@@ -7,15 +7,25 @@ const ImageBox = ({ imgSrc, age, name, date, location }) => {
     <Box
       width="100%"
       sx={{
-        backgroundImage: `url(${imgSrc})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        display: "flex",
-        alignItems: "flex-end",
-        height: { xs: "350px", sm: "500px" },
+        aspectRatio: "1 / 1",
+        position: "relative",
       }}
     >
+      <Box
+        component="img"
+        src={imgSrc}
+        alt={name || "image"}
+        sx={{
+          width: "100%",
+          height: "100%",
+          objectFit: "contain",
+        }}
+      />
+
+      {/* Overlay content */}
       {/* <Box
+        position="absolute"
+        bottom={0}
         width="100%"
         display="flex"
         alignItems="center"
@@ -52,15 +62,11 @@ const ImageBox = ({ imgSrc, age, name, date, location }) => {
           color="#FFFFFF"
         >
           {name && (
-            <Typography fontWeight={800} color="#FFFFF" fontSize={20} ml={0.5}>
+            <Typography fontWeight={800} fontSize={20} ml={0.5}>
               {name}
             </Typography>
           )}
-          <Box
-            display={"flex"}
-            flexDirection={"column"}
-            alignItems={"flex-start"}
-          >
+          <Box display="flex" flexDirection="column" alignItems="flex-start">
             {location && (
               <Box display="flex" alignItems="center" gap={1}>
                 <MdLocationOn size={16} color="white" />
@@ -69,7 +75,7 @@ const ImageBox = ({ imgSrc, age, name, date, location }) => {
             )}
             {date && (
               <Box display="flex" alignItems="center" gap={1}>
-                <AiOutlineClockCircle size={16} />
+                <AiOutlineClockCircle size={16} color="white" />
                 <Typography fontSize={13}>{date}</Typography>
               </Box>
             )}

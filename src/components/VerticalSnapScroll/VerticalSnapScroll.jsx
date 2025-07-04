@@ -38,18 +38,18 @@ export default function VerticalSnapScroll({
     if (!container) return;
 
     const handleWheel = (e) => {
-      const scrollable = e.target.closest(".scrollable-content");
+      const scrollable = container.querySelector(".scrollable-content");
       if (scrollable && canScrollFurther(scrollable, e.deltaY)) {
-        return; // scroll inner content
+        // inner can scroll: let default scroll happen
+        return;
       }
-
       e.preventDefault();
       if (isAnimatingRef.current) return;
-
+    
       const newDirection = e.deltaY > 0 ? 1 : -1;
       let next = currentIndex + newDirection;
       next = Math.max(0, Math.min(items.length - 1, next));
-
+    
       if (next !== currentIndex) {
         setPrevIndex(currentIndex);
         setCurrentIndex(next);
@@ -57,6 +57,7 @@ export default function VerticalSnapScroll({
         setTimeout(() => (isAnimatingRef.current = false), 500);
       }
     };
+    
 
     container.addEventListener("wheel", handleWheel, { passive: false });
     return () => container.removeEventListener("wheel", handleWheel);
@@ -75,11 +76,14 @@ export default function VerticalSnapScroll({
 
     const handleTouchMove = (e) => {
       deltaY = e.touches[0].clientY - startY;
-      const scrollable = e.target.closest(".scrollable-content");
+      const scrollable = container.querySelector(".scrollable-content");
       if (scrollable && canScrollFurther(scrollable, -deltaY)) {
         isScrollingInnerRef.current = true;
+      } else {
+        isScrollingInnerRef.current = false;
       }
     };
+    
 
     const handleTouchEnd = () => {
       const scrollable = container.querySelector(".scrollable-content");

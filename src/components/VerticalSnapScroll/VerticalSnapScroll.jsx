@@ -79,10 +79,13 @@ export default function VerticalSnapScroll({
       const scrollable = container.querySelector(".scrollable-content");
       if (scrollable && canScrollFurther(scrollable, -deltaY)) {
         isScrollingInnerRef.current = true;
+        // allow native scroll
       } else {
         isScrollingInnerRef.current = false;
+        e.preventDefault(); // block native scroll → do swipe instead
       }
     };
+    
     
 
     const handleTouchEnd = () => {
@@ -115,7 +118,7 @@ export default function VerticalSnapScroll({
     
 
     container.addEventListener("touchstart", handleTouchStart, { passive: true });
-    container.addEventListener("touchmove", handleTouchMove, { passive: true });
+    container.addEventListener("touchmove", handleTouchMove, { passive: false });
     container.addEventListener("touchend", handleTouchEnd);
 
     return () => {

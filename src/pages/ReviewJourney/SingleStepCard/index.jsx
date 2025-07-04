@@ -22,6 +22,7 @@ export default function SingleStepCard({ summary, user, step, isFirstStep }) {
       display="flex"
       flexDirection="column"
       height="100%"
+      minHeight={0} 
       bgcolor={"black"}
       gap={2}
     >

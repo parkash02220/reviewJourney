@@ -23,13 +23,19 @@ export default function VerticalSnapScroll({
 
   const canScrollFurther = (el, deltaY) => {
     if (!el) return false;
-    const scrollTop = el.scrollTop;
-    const scrollHeight = el.scrollHeight;
-    const clientHeight = el.clientHeight;
-    if (deltaY > 0) {
-      return scrollTop + clientHeight < scrollHeight; // can scroll down
-    } else {
-      return scrollTop > 0; // can scroll up
+    const { scrollTop, scrollHeight, clientHeight } = el;
+    return deltaY > 0
+      ? scrollTop + clientHeight < scrollHeight
+      : scrollTop > 0;
+  };
+
+  const snapToIndex = (next) => {
+    next = Math.max(0, Math.min(items.length - 1, next));
+    if (next !== currentIndex) {
+      setPrevIndex(currentIndex);
+      setCurrentIndex(next);
+      isAnimatingRef.current = true;
+      setTimeout(() => (isAnimatingRef.current = false), 500);
     }
   };
 
@@ -39,25 +45,14 @@ export default function VerticalSnapScroll({
 
     const handleWheel = (e) => {
       const scrollable = container.querySelector(".scrollable-content");
-      if (scrollable && canScrollFurther(scrollable, e.deltaY)) {
-        // inner can scroll: let default scroll happen
-        return;
-      }
-      e.preventDefault();
+      if (scrollable && canScrollFurther(scrollable, e.deltaY)) return;
+
+      if (e.cancelable) e.preventDefault();
       if (isAnimatingRef.current) return;
-    
+
       const newDirection = e.deltaY > 0 ? 1 : -1;
-      let next = currentIndex + newDirection;
-      next = Math.max(0, Math.min(items.length - 1, next));
-    
-      if (next !== currentIndex) {
-        setPrevIndex(currentIndex);
-        setCurrentIndex(next);
-        isAnimatingRef.current = true;
-        setTimeout(() => (isAnimatingRef.current = false), 500);
-      }
+      snapToIndex(currentIndex + newDirection);
     };
-    
 
     container.addEventListener("wheel", handleWheel, { passive: false });
     return () => container.removeEventListener("wheel", handleWheel);
@@ -66,56 +61,52 @@ export default function VerticalSnapScroll({
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
+
     let startY = 0;
     let deltaY = 0;
+    let startTime = 0; // NEW
 
     const handleTouchStart = (e) => {
       startY = e.touches[0].clientY;
+      deltaY = 0;
+      startTime = Date.now(); // NEW
       isScrollingInnerRef.current = false;
     };
 
     const handleTouchMove = (e) => {
       deltaY = e.touches[0].clientY - startY;
       const scrollable = container.querySelector(".scrollable-content");
+
       if (scrollable && canScrollFurther(scrollable, -deltaY)) {
         isScrollingInnerRef.current = true;
-        // allow native scroll
-      } else {
-        isScrollingInnerRef.current = false;
-        e.preventDefault(); // block native scroll → do swipe instead
+        return;
+      }
+
+      if (!isScrollingInnerRef.current && e.cancelable) {
+        e.preventDefault();
       }
     };
-    
-    
 
     const handleTouchEnd = () => {
-      const scrollable = container.querySelector(".scrollable-content");
+      const endTime = Date.now();
+      const duration = (endTime - startTime) / 1000; // in seconds
+      const velocity = deltaY / duration; // px/sec
+
       const newDirection = deltaY < 0 ? 1 : -1;
-    
-      if (scrollable) {
-        const stillCanScroll = canScrollFurther(scrollable, -deltaY);
-        if (isScrollingInnerRef.current && stillCanScroll) {
-          // user is scrolling inner content and there *is* still scroll → don’t change card
-          startY = deltaY = 0;
-          return;
-        }
-        // else: user is scrolling inner but already at end → treat as swipe
+
+      // quick flick → velocity threshold (absolute)
+      const fastFlick = Math.abs(velocity) > 1000;
+      // slow swipe → distance threshold
+      const longSwipe = Math.abs(deltaY) > 50;
+
+      if ((fastFlick || longSwipe) && !isAnimatingRef.current) {
+        snapToIndex(currentIndex + newDirection);
       }
-    
-      if (Math.abs(deltaY) > 50 && !isAnimatingRef.current) {
-        let next = currentIndex + newDirection;
-        next = Math.max(0, Math.min(items.length - 1, next));
-    
-        if (next !== currentIndex) {
-          setPrevIndex(currentIndex);
-          setCurrentIndex(next);
-          isAnimatingRef.current = true;
-          setTimeout(() => (isAnimatingRef.current = false), 500);
-        }
-      }
-      startY = deltaY = 0;
+
+      startY = 0;
+      deltaY = 0;
+      startTime = 0;
     };
-    
 
     container.addEventListener("touchstart", handleTouchStart, { passive: true });
     container.addEventListener("touchmove", handleTouchMove, { passive: false });
@@ -132,6 +123,7 @@ export default function VerticalSnapScroll({
     <Box
       ref={containerRef}
       sx={{
+        touchAction: "none",
         height: "100dvh",
         width: "100vw",
         overflow: "hidden",

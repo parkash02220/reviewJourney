@@ -77,38 +77,36 @@ export default function VerticalSnapScroll({
       deltaY = e.touches[0].clientY - startY;
       const scrollable = container.querySelector(".scrollable-content");
   
-      if (scrollable && canScrollFurther(scrollable, -deltaY)) {
-        isScrollingInnerRef.current = true;
-        return; // let inner scroll happen
+      if (scrollable) {
+        if (canScrollFurther(scrollable, -deltaY)) {
+          isScrollingInnerRef.current = true; // remember that inner did scroll
+          return; // let native scroll happen
+        }
       }
   
-      if (!isScrollingInnerRef.current && e.cancelable) {
-        e.preventDefault(); // block native to enable swipe
+      if (e.cancelable) {
+        e.preventDefault(); // block native scroll → treat as swipe
       }
     };
   
     const handleTouchEnd = () => {
       const endTime = Date.now();
-      const duration = (endTime - startTime) / 1000; // seconds
+      const duration = (endTime - startTime) / 1000;
       const velocity = deltaY / duration;
       const newDirection = deltaY < 0 ? 1 : -1;
   
       const fastFlick = Math.abs(velocity) > 1000;
       const longSwipe = Math.abs(deltaY) > 50;
   
-      const scrollable = container.querySelector(".scrollable-content");
-      const innerCanStillScroll = scrollable ? canScrollFurther(scrollable, -deltaY) : false;
-  
-      if ((fastFlick || longSwipe) && !isAnimatingRef.current) {
-        if (!innerCanStillScroll) {
-          snapToIndex(currentIndex + newDirection);
-        }
-        // else: user was still able to scroll → don’t snap
+      if (!isScrollingInnerRef.current && (fastFlick || longSwipe) && !isAnimatingRef.current) {
+        snapToIndex(currentIndex + newDirection);
       }
+      // else: user actually scrolled inner → don't snap
   
       startY = 0;
       deltaY = 0;
       startTime = 0;
+      isScrollingInnerRef.current = false;
     };
   
     container.addEventListener("touchstart", handleTouchStart, { passive: true });
@@ -121,6 +119,7 @@ export default function VerticalSnapScroll({
       container.removeEventListener("touchend", handleTouchEnd);
     };
   }, [currentIndex, items.length]);
+  
   
 
   return (

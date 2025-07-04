@@ -43,6 +43,7 @@ export default function SingleStepCard({ summary, user, step, isFirstStep }) {
         overflow="auto"
         minHeight={0}
         sx={{
+          paddingBottom: 'calc(env(safe-area-inset-bottom) + 16px)',
           scrollbarWidth: 'none', 
           msOverflowStyle: 'none', 
           '&::-webkit-scrollbar': {
@@ -114,7 +115,7 @@ export default function SingleStepCard({ summary, user, step, isFirstStep }) {
 
         {step.event && (
           <Box paddingInline={2}>
-              <Typography fontSize={14} color="#FFFFFF" pb={2}>
+              <Typography fontSize={14} color="#FFFFFF">
                 {step.event}
               </Typography>
           </Box>

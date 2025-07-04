@@ -7,7 +7,7 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import { useMemo } from "react";
-export default function SingleStepCard({ summary, user, step, isFirstStep,bottomeRef }) {
+export default function SingleStepCard({ summary, user, step, isFirstStep,bottomeRef,topRef }) {
   const date = useMemo(() => {
     return step.timestamp
       ? new Date(step.timestamp).toLocaleDateString("en-US", {
@@ -24,7 +24,7 @@ export default function SingleStepCard({ summary, user, step, isFirstStep,bottom
     height="100%"
     minHeight={0}
     bgcolor="black"
-    pb={2}
+    pb={5}
   >
     <Box flex="0 0 auto">
       <ProgressHeader />
@@ -42,6 +42,8 @@ export default function SingleStepCard({ summary, user, step, isFirstStep,bottom
         '&::-webkit-scrollbar': { display: 'none' },
       }}
     >
+        <Box ref={topRef} sx={{ height: '10px', bgcolor: 'red', width: '100%' }} />
+
         {step.img && (
           <ImageBox
             imgSrc={step.img}

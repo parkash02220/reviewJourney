@@ -15,7 +15,10 @@ export default function VerticalSnapScroll({
   const isScrollingInnerRef = useRef(false);
 
   // Intersection observer to know if bottom sentinel is visible
-  const { ref: bottomRef, inView } = useInView({ threshold: 0.1 });
+  const { ref: bottomRef, inView: bottomInView } = useInView({
+    threshold: 0.1,
+  });
+  const { ref: topRef, inView: topInView } = useInView({ threshold: 0.1 });
 
   const direction = currentIndex > prevIndex ? 1 : -1;
 
@@ -30,7 +33,7 @@ export default function VerticalSnapScroll({
     const { scrollTop, scrollHeight, clientHeight } = el;
     return deltaY > 0
       ? scrollTop + clientHeight < scrollHeight // can scroll down
-      : scrollTop > 0;                          // can scroll up
+      : scrollTop > 0; // can scroll up
   };
 
   const snapToIndex = (next) => {
@@ -59,15 +62,15 @@ export default function VerticalSnapScroll({
 
       // If going to next card, require bottomRef inView
       if (newDirection > 0) {
-        if (inView) snapToIndex(currentIndex + newDirection);
+        if (bottomInView) snapToIndex(currentIndex + newDirection);
       } else {
-        snapToIndex(currentIndex + newDirection);
+        if (topInView) snapToIndex(currentIndex + newDirection);
       }
     };
 
     container.addEventListener("wheel", handleWheel, { passive: false });
     return () => container.removeEventListener("wheel", handleWheel);
-  }, [currentIndex, items.length, inView]);
+  }, [currentIndex, items.length, bottomInView,topInView]);
 
   /** Handle touch (mobile) */
   useEffect(() => {
@@ -110,10 +113,9 @@ export default function VerticalSnapScroll({
 
       if (!isAnimatingRef.current && (fastFlick || longSwipe)) {
         if (newDirection > 0) {
-          // going down → only if bottomRef inView
-          if (inView) snapToIndex(currentIndex + newDirection);
+          if (bottomInView) snapToIndex(currentIndex + newDirection);
         } else {
-          snapToIndex(currentIndex + newDirection);
+          if (topInView) snapToIndex(currentIndex + newDirection);
         }
       }
 
@@ -123,8 +125,12 @@ export default function VerticalSnapScroll({
       isScrollingInnerRef.current = false;
     };
 
-    container.addEventListener("touchstart", handleTouchStart, { passive: true });
-    container.addEventListener("touchmove", handleTouchMove, { passive: false });
+    container.addEventListener("touchstart", handleTouchStart, {
+      passive: true,
+    });
+    container.addEventListener("touchmove", handleTouchMove, {
+      passive: false,
+    });
     container.addEventListener("touchend", handleTouchEnd);
 
     return () => {
@@ -132,7 +138,7 @@ export default function VerticalSnapScroll({
       container.removeEventListener("touchmove", handleTouchMove);
       container.removeEventListener("touchend", handleTouchEnd);
     };
-  }, [currentIndex, items.length, inView]);
+  }, [currentIndex, items.length, bottomInView,topInView]);
 
   return (
     <Box
@@ -161,11 +167,11 @@ export default function VerticalSnapScroll({
             position: "absolute",
             top: 0,
             left: 0,
-            overflow:'hidden',
+            overflow: "hidden",
           }}
         >
           {/* Pass bottomRef to content: place it at the end of scrollable content */}
-          {renderItem(items[currentIndex], currentIndex, bottomRef)}
+          {renderItem(items[currentIndex], currentIndex, bottomRef, topRef)}
         </motion.div>
       </AnimatePresence>
     </Box>

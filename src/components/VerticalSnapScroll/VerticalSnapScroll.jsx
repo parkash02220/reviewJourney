@@ -132,7 +132,7 @@ export default function VerticalSnapScroll({
     <Box
       ref={containerRef}
       sx={{
-        height: {xs:"calc(100dvh - 100px",sm:"100dvh"},
+        height: "100dvh",
         width: "100vw",
         overflow: "hidden",
         position: "relative",

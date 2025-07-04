@@ -56,14 +56,11 @@ export default function ReviewJourney() {
     return (
       <Box
         width="100vw"
-        // height="100dvh"
+        height="100dvh"
         display="flex"
         justifyContent="center"
         alignItems="center"
         flexDirection="column"
-        sx={{
-          height:{xs:"calc(100dvh - 100px",sm:"100dvh"},
-        }}
       >
         <Typography fontSize={24} fontWeight={800}>
           Something went wrong...
@@ -77,11 +74,7 @@ export default function ReviewJourney() {
 
   if (loading || !hasFetchedDataOnce) {
     return (
-      <Box width="100vw"
-      sx={{
-        height:{xs:"calc(100dvh - 100px",sm:"100dvh"},
-      }}
-      >
+      <Box width="100vw" height="100dvh">
         <Loader />
       </Box>
     );
@@ -98,7 +91,11 @@ export default function ReviewJourney() {
   }
 
   return (
-    <Box display={"flex"} flexDirection={"column"} sx={{background:{xs:"black",sm:"white"}}}>
+    <Box
+      display={"flex"}
+      flexDirection={"column"}
+      sx={{ background: { xs: "black", sm: "white" } }}
+    >
       <Header />
       <VerticalSnapScroll
         items={items}
@@ -127,7 +124,7 @@ export default function ReviewJourney() {
         )}
         onIndexChange={(index) => console.log("Visible index:", index)}
         containerSx={{
-          height: {xs:"calc(100dvh - 156px",sm:"calc(100dvh - 56px"},
+          height: "calc(100dvh - 56px)",
         }}
       />
     </Box>

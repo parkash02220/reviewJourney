@@ -22,33 +22,6 @@ export default function SingleStepCard({ summary, user, step, isFirstStep }) {
       : "";
   }, [step]);
 
-  useEffect(() => {
-    if (!showMore) return;
-
-    const scrollable = contentRef.current?.closest(".scrollable-content");
-    if (!scrollable) return;
-
-    requestAnimationFrame(() => {
-      const scrollTarget = scrollable.scrollHeight - scrollable.clientHeight;
-      animate(scrollable.scrollTop, scrollTarget, {
-        duration: 0.6,
-        ease: [0.22, 1, 0.36, 1],
-        onUpdate: (latest) => {
-          scrollable.scrollTop = latest;
-        },
-      });
-    });
-  }, [showMore]);
-
-  useEffect(() => {
-    const scrollable = contentRef.current?.closest(".scrollable-content");
-    if (!scrollable) return;
-
-    if (scrollable.scrollHeight > scrollable.clientHeight) {
-      scrollable.scrollTop = scrollable.scrollHeight - scrollable.clientHeight;
-    }
-  }, []);
-
   const toggleShowMore = (e) => {
     e.stopPropagation();
     setShowMore((prev) => !prev);
@@ -71,21 +44,11 @@ export default function SingleStepCard({ summary, user, step, isFirstStep }) {
       </Box>
 
       <Box
-        component={motion.div}
-        className="scrollable-content"
         flex="1 1 auto"
         minHeight={0}
-        overflow="hidden" // disable manual scrolling
-        sx={{
-          scrollbarWidth: "none",
-          msOverflowStyle: "none",
-          "&::-webkit-scrollbar": { display: "none" },
-        }}
-        animate={{ paddingBottom: showMore ? 20 : 0 }}
-        transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
         onClick={closeShowMore}
       >
-        {step.img && <ImageBox imgSrc={step.img} name={user?.name} />}
+        {step?.img && <ImageBox imgSrc={step.img} name={user?.name} />}
 
         <Box mt={1} display="flex" flexDirection="column" gap={1} px={2}>
           {(user?.name || user?.age) && (

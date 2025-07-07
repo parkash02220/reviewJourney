@@ -94,38 +94,28 @@ export default function ReviewJourney() {
     <Box
       display={"flex"}
       flexDirection={"column"}
-      sx={{ background: { xs: "black", sm: "white" } }}
     >
       <Header />
       {items?.map((item, ind) => {
         return (
-          <Box
+          <Grid
+            container
             key={ind}
-            overflow={"auto"}
             sx={{
-              scrollbarWidth: "none",
-              msOverflowStyle: "none",
-              "&::-webkit-scrollbar": { display: "none" },
+              height: "100%",
             }}
           >
-            <Grid
-              container
-              sx={{
-                height: "100%",
-              }}
-            >
-              <Grid size={{ xs: 0, sm: 3, md: 4 }}></Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 4 }} height={"100%"}>
-                <SingleStepCard
-                  summary={item.summary}
-                  user={item.user}
-                  step={item.step}
-                  isFirstStep={item.indexInSummary === 0}
-                />
-              </Grid>
-              <Grid size={{ xs: 0, sm: 3, md: 4 }}></Grid>
+            <Grid size={{ xs: 0, sm: 3, md: 4 }}></Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 4 }} height={"100%"}>
+              <SingleStepCard
+                summary={item.summary}
+                user={item.user}
+                step={item.step}
+                isFirstStep={item.indexInSummary === 0}
+              />
             </Grid>
-          </Box>
+            <Grid size={{ xs: 0, sm: 3, md: 4 }}></Grid>
+          </Grid>
         );
       })}
     </Box>

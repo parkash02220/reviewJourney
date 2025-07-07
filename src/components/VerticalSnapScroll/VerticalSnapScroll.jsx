@@ -1,7 +1,6 @@
 import React, { useRef, useState, useEffect } from "react";
 import { Box } from "@mui/material";
 import { AnimatePresence, motion } from "framer-motion";
-import { useInView } from "react-intersection-observer";
 
 export default function VerticalSnapScroll({
   items = [],
@@ -11,13 +10,9 @@ export default function VerticalSnapScroll({
   const containerRef = useRef(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [prevIndex, setPrevIndex] = useState(0);
-  const isAnimatingRef = useRef(false);
-  const isScrollingInnerRef = useRef(false);
 
-  const { ref: bottomRef, inView: bottomInView } = useInView({
-    threshold: 0.1,
-  });
-  const { ref: topRef, inView: topInView } = useInView({ threshold: 0.1 });
+  const isAnimatingRef = useRef(false);
+  const lastScrollTime = useRef(0);
 
   const direction = currentIndex > prevIndex ? 1 : -1;
 
@@ -27,53 +22,38 @@ export default function VerticalSnapScroll({
     exit: (dir) => ({ y: dir > 0 ? -100 : 100, opacity: 0 }),
   };
 
-  const canScrollFurther = (el, deltaY) => {
-    if (!el) return false;
-    const { scrollTop, scrollHeight, clientHeight } = el;
-    return deltaY > 0 ? scrollTop + clientHeight < scrollHeight : scrollTop > 0;
-  };
-
   const snapToIndex = (next) => {
     next = Math.max(0, Math.min(items.length - 1, next));
     if (next !== currentIndex) {
       setPrevIndex(currentIndex);
       setCurrentIndex(next);
       isAnimatingRef.current = true;
-      setTimeout(() => (isAnimatingRef.current = false), 500);
+      lastScrollTime.current = Date.now();
+      setTimeout(() => {
+        isAnimatingRef.current = false;
+      }, 600);
     }
   };
+
+  const throttleDuration = 700;
 
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
 
     const handleWheel = (e) => {
-      if (isAnimatingRef.current) return;
+      const now = Date.now();
+      if (isAnimatingRef.current || now - lastScrollTime.current < throttleDuration) return;
     
-      const scrollable = container.querySelector(".scrollable-content");
       const newDirection = e.deltaY > 0 ? 1 : -1;
-
-      if (scrollable && scrollable.contains(e.target)) {
-        if (canScrollFurther(scrollable, e.deltaY)) {
-          return;
-        } else {
-          if (e.cancelable) e.preventDefault();
-          if (newDirection > 0) {
-            if (bottomInView) snapToIndex(currentIndex + 1);
-          } else {
-            if (topInView) snapToIndex(currentIndex - 1);
-          }
-        }
-      } else {
-        if (e.cancelable) e.preventDefault();
-        snapToIndex(currentIndex + newDirection);
-      }
-    };
     
+      if (e.cancelable) e.preventDefault();
+      snapToIndex(currentIndex + newDirection);
+    };
 
     container.addEventListener("wheel", handleWheel, { passive: false });
     return () => container.removeEventListener("wheel", handleWheel);
-  }, [currentIndex, items.length, bottomInView, topInView]);
+  }, [currentIndex, items.length]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -87,52 +67,31 @@ export default function VerticalSnapScroll({
       startY = e.touches[0].clientY;
       deltaY = 0;
       startTime = Date.now();
-      isScrollingInnerRef.current = false;
     };
 
     const handleTouchMove = (e) => {
       deltaY = e.touches[0].clientY - startY;
-      const scrollable = container.querySelector(".scrollable-content");
-
-      if (scrollable && canScrollFurther(scrollable, -deltaY)) {
-        isScrollingInnerRef.current = true;
-        return;
-      }
-
-      if (!isScrollingInnerRef.current && e.cancelable) {
-        e.preventDefault();
-      }
+      if (e.cancelable) e.preventDefault(); 
     };
-
+    
     const handleTouchEnd = () => {
-      const endTime = Date.now();
-      const duration = (endTime - startTime) / 1000;
+      const now = Date.now();
+      if (isAnimatingRef.current || now - lastScrollTime.current < throttleDuration) return;
+    
+      const duration = (now - startTime) / 1000;
       const velocity = deltaY / duration;
       const newDirection = deltaY < 0 ? 1 : -1;
-
+    
       const fastFlick = Math.abs(velocity) > 1000;
       const longSwipe = Math.abs(deltaY) > 50;
-
-      if (!isAnimatingRef.current && (fastFlick || longSwipe)) {
-        if (newDirection > 0) {
-          if (bottomInView) snapToIndex(currentIndex + newDirection);
-        } else {
-          if (topInView) snapToIndex(currentIndex + newDirection);
-        }
+    
+      if (fastFlick || longSwipe) {
+        snapToIndex(currentIndex + newDirection);
       }
-
-      startY = 0;
-      deltaY = 0;
-      startTime = 0;
-      isScrollingInnerRef.current = false;
     };
 
-    container.addEventListener("touchstart", handleTouchStart, {
-      passive: true,
-    });
-    container.addEventListener("touchmove", handleTouchMove, {
-      passive: false,
-    });
+    container.addEventListener("touchstart", handleTouchStart, { passive: true });
+    container.addEventListener("touchmove", handleTouchMove, { passive: false });
     container.addEventListener("touchend", handleTouchEnd);
 
     return () => {
@@ -140,7 +99,7 @@ export default function VerticalSnapScroll({
       container.removeEventListener("touchmove", handleTouchMove);
       container.removeEventListener("touchend", handleTouchEnd);
     };
-  }, [currentIndex, items.length, bottomInView, topInView]);
+  }, [currentIndex, items.length]);
 
   return (
     <Box
@@ -162,7 +121,7 @@ export default function VerticalSnapScroll({
           initial="enter"
           animate="center"
           exit="exit"
-          transition={{ duration: 0.4, ease: "easeInOut" }}
+          transition={{ duration: 0.5, ease: "easeInOut" }}
           style={{
             height: "100%",
             width: "100%",
@@ -172,7 +131,7 @@ export default function VerticalSnapScroll({
             overflow: "hidden",
           }}
         >
-          {renderItem(items[currentIndex], currentIndex, bottomRef, topRef)}
+          {renderItem(items[currentIndex], currentIndex)}
         </motion.div>
       </AnimatePresence>
     </Box>

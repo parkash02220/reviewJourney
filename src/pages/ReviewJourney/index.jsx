@@ -97,38 +97,37 @@ export default function ReviewJourney() {
       sx={{ background: { xs: "black", sm: "white" } }}
     >
       <Header />
-      <VerticalSnapScroll
-        items={items}
-        renderItem={(item, index, bottomeRef, topRef) => (
-          <Grid
-            container
-            spacing={{xs:0,sm:2}}
+      {items?.map((item, ind) => {
+        return (
+          <Box
+            key={ind}
+            overflow={"auto"}
             sx={{
-              height: "100%",
+              scrollbarWidth: "none",
+              msOverflowStyle: "none",
+              "&::-webkit-scrollbar": { display: "none" },
             }}
           >
-            <Grid size={{ xs: 0, sm: 1, md: 2, lg: 3, xl: 4 }}></Grid>
             <Grid
-              size={{ xs: 12, sm: 10, md: 8, lg: 6, xl: 4 }}
-              height={"100%"}
+              container
+              sx={{
+                height: "100%",
+              }}
             >
-              <SingleStepCard
-                summary={item.summary}
-                user={item.user}
-                step={item.step}
-                isFirstStep={item.indexInSummary === 0}
-                bottomeRef={bottomeRef}
-                topRef={topRef}
-              />
+              <Grid size={{ xs: 0, sm: 3, md: 4 }}></Grid>
+              <Grid size={{ xs: 12, sm: 6, md: 4 }} height={"100%"}>
+                <SingleStepCard
+                  summary={item.summary}
+                  user={item.user}
+                  step={item.step}
+                  isFirstStep={item.indexInSummary === 0}
+                />
+              </Grid>
+              <Grid size={{ xs: 0, sm: 3, md: 4 }}></Grid>
             </Grid>
-            <Grid size={{ xs: 0, sm: 1, md: 2, lg: 3, xl: 4 }}></Grid>
-          </Grid>
-        )}
-        onIndexChange={(index) => console.log("Visible index:", index)}
-        containerSx={{
-          height: "calc(100dvh - 56px)",
-        }}
-      />
+          </Box>
+        );
+      })}
     </Box>
   );
 }

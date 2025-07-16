@@ -8,7 +8,7 @@ export default defineConfig({
     port: 5173,
     host: '0.0.0.0',
     strictPort: true,
-    allowedHosts: ['all', 'b79e-112-196-50-213.ngrok-free.app'],
-    origin: 'https://b79e-112-196-50-213.ngrok-free.app',
+    allowedHosts: ['all', '43128958fc4b.ngrok-free.app'],
+    origin: 'https://43128958fc4b.ngrok-free.app',
   },
 })

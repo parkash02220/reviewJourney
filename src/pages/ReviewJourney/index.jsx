@@ -1,76 +1,60 @@
-import { useEffect, useMemo } from "react";
-import { Box, Grid, Typography } from "@mui/material";
+import React, { useEffect, useMemo } from "react";
+import { Box, Typography } from "@mui/material";
 import { useLocation } from "react-router-dom";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Mousewheel } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/mousewheel";
 import useGetJourneyData from "../../hooks/useGetJourneyData";
-import VerticalSnapScroll from "../../components/VerticalSnapScroll";
-import Header from "./Components/Header";
-import Loader from "../../components/Loader/Loader";
 import SingleStepCard from "./SingleStepCard";
+import Loader from "../../components/Loader/Loader";
 
 export default function ReviewJourney() {
   const { search } = useLocation();
   const queryParams = new URLSearchParams(search);
-  const baseUrl = queryParams.get("base_url");
-  const user_id = queryParams.get("user_id");
-  const journey_id = queryParams.get("journey_id");
+
+  const baseUrl = queryParams.get("base_url") || "";
+  const userId = queryParams.get("user_id") || "";
+  const journeyId = queryParams.get("journey_id") || "";
 
   const { data, loading, error, getJourneyData, hasFetchedDataOnce } =
     useGetJourneyData();
 
+  const MAX_STEPS_PER_SUMMARY = 3;
+
   useEffect(() => {
-    if (baseUrl && user_id && journey_id && !hasFetchedDataOnce) {
-      getJourneyData(baseUrl, user_id, journey_id);
+    if (baseUrl && userId && journeyId && !hasFetchedDataOnce) {
+      getJourneyData(baseUrl, userId, journeyId);
     }
-  }, [baseUrl, user_id, journey_id, hasFetchedDataOnce]);
+  }, [baseUrl, userId, journeyId, hasFetchedDataOnce, getJourneyData]);
 
-  const items = useMemo(() => {
-    return (
-      data?.summary
-        ?.filter((summary) => summary?.journey_details)
-        ?.flatMap((summary) => {
-          const journey = summary.journey_details;
-          const maxSteps = 3;
-          const steps = [];
+  const journeyItems = useMemo(() => {
+    if (!data?.summary?.length) return [];
 
-          for (let i = 1; i <= maxSteps; i++) {
-            const img = journey?.[`img_${i}`];
-            const event = journey?.[`event_${i}`];
-            const timestamp = journey?.[`timestamp_${i}`];
-            const location = journey?.[`location_${i}`];
+    return data.summary
+      .filter((s) => s?.journey_details)
+      .flatMap((summary) => {
+        const journey = summary.journey_details;
 
-            if (img || event) {
-              steps.push({
+        return Array.from({ length: MAX_STEPS_PER_SUMMARY }, (_, idx) => {
+          const stepIndex = idx + 1;
+
+          const img = journey?.[`img_${stepIndex}`];
+          const event = journey?.[`event_${stepIndex}`];
+          const timestamp = journey?.[`timestamp_${stepIndex}`];
+          const location = journey?.[`location_${stepIndex}`];
+
+          return img || event
+            ? {
                 summary,
                 user: data?.user,
                 step: { img, event, timestamp, location },
-                indexInSummary: i - 1,
-              });
-            }
-          }
-          return steps;
-        }) || []
-    );
+                indexInSummary: idx,
+              }
+            : null;
+        }).filter(Boolean);
+      });
   }, [data]);
-
-  if (error) {
-    return (
-      <Box
-        width="100vw"
-        height="100dvh"
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        flexDirection="column"
-      >
-        <Typography fontSize={24} fontWeight={800}>
-          Something went wrong...
-        </Typography>
-        <Typography fontSize={18} fontWeight={500}>
-          {error}
-        </Typography>
-      </Box>
-    );
-  }
 
   if (loading || !hasFetchedDataOnce) {
     return (
@@ -80,44 +64,67 @@ export default function ReviewJourney() {
     );
   }
 
-  if (!loading && hasFetchedDataOnce && items.length === 0) {
+  if (error) {
     return (
-      <Box width="100vw" height="100dvh">
+      <Box
+        width="100vw"
+        height="100dvh"
+        display="flex"
+        flexDirection="column"
+        justifyContent="center"
+        alignItems="center"
+        textAlign="center"
+        px={2}
+      >
         <Typography fontSize={24} fontWeight={800}>
-          No data to show...
+          Something went wrong…
+        </Typography>
+        <Typography fontSize={18}>{error}</Typography>
+      </Box>
+    );
+  }
+
+  if (!journeyItems.length) {
+    return (
+      <Box
+        width="100vw"
+        height="100dvh"
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+      >
+        <Typography fontSize={24} fontWeight={800}>
+          No data to show…
         </Typography>
       </Box>
     );
   }
 
   return (
-    <Box
-      display={"flex"}
-      flexDirection={"column"}
+    <Swiper
+      direction="vertical"
+      slidesPerView={1}
+      mousewheel={{ forceToAxis: true, sensitivity: 1 }}
+      modules={[Mousewheel]}
+      style={{ height: "100dvh" }}
     >
-      <Header />
-      {items?.map((item, ind) => {
-        return (
-          <Grid
-            container
-            key={ind}
-            sx={{
-              height: "100%",
-            }}
+      {journeyItems.map((item, idx) => (
+        <SwiperSlide key={idx}>
+          <Box
+            width="100%"
+            maxWidth={{ xs: "100%", sm: 500}}
+            height="100%"
+            mx="auto"
           >
-            <Grid size={{ xs: 0, sm: 3, md: 4 }}></Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 4 }} height={"100%"}>
-              <SingleStepCard
-                summary={item.summary}
-                user={item.user}
-                step={item.step}
-                isFirstStep={item.indexInSummary === 0}
-              />
-            </Grid>
-            <Grid size={{ xs: 0, sm: 3, md: 4 }}></Grid>
-          </Grid>
-        );
-      })}
-    </Box>
+            <SingleStepCard
+              summary={item.summary}
+              user={item.user}
+              step={item.step}
+              isFirstStep={item.indexInSummary === 0}
+            />
+          </Box>
+        </SwiperSlide>
+      ))}
+    </Swiper>
   );
 }

@@ -1,56 +1,88 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import React, { useMemo, useState, useRef, useLayoutEffect, useEffect } from "react";
 import { Box, Button, Typography } from "@mui/material";
-import { motion, animate } from "framer-motion";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
-
 import ImageBox from "../Components/ImageBox";
 import ProgressHeader from "../Components/ProgressHeader";
+import Header from "../Components/Header";
 
-export default function SingleStepCard({ summary, user, step, isFirstStep }) {
+export default function SingleStepCard({ summary, user, step }) {
   const [showMore, setShowMore] = useState(false);
+  const slideRef = useRef(null);
   const contentRef = useRef(null);
+  const imageBoxRef = useRef(null);
+  const [lockedImageHeight, setLockedImageHeight] = useState(null);
 
-  const date = useMemo(() => {
-    return step.timestamp
-      ? new Date(step.timestamp).toLocaleDateString("en-US", {
-          year: "numeric",
-          month: "long",
-          day: "numeric",
-        })
-      : "";
-  }, [step]);
+  const MAX_PREVIEW_LENGTH = 135;
 
-  const toggleShowMore = (e) => {
+  const date = useMemo(
+    () =>
+      step?.timestamp
+        ? new Date(step.timestamp).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
+        : "",
+    [step?.timestamp]
+  );
+
+  const hasLongEvent = step?.event?.length > MAX_PREVIEW_LENGTH;
+  const previewText = hasLongEvent ? step?.event?.slice(0, MAX_PREVIEW_LENGTH) : step?.event || "";
+
+useLayoutEffect(() => {
+  if (!imageBoxRef.current) return;
+  const observer = new ResizeObserver(entries => {
+    for (let entry of entries) {
+      setLockedImageHeight(entry.contentRect.height);
+    }
+  });
+  observer.observe(imageBoxRef.current);
+
+  return () => observer.disconnect();
+}, []);
+
+  useLayoutEffect(() => {
+    const slide = slideRef.current;
+    const content = contentRef.current;
+    if (!slide || !content) return;
+
+    if (showMore) {
+      slide.scrollTo({
+        top: content.offsetTop + content.offsetHeight - slide.clientHeight,
+        behavior: "smooth"
+      });
+    } else {
+      slide.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  }, [showMore]);
+
+  const handleToggleShowMore = (e) => {
     e.stopPropagation();
-    setShowMore((prev) => !prev);
-  };
-
-  const closeShowMore = () => {
-    if (showMore) setShowMore(false);
+    setShowMore(prev => !prev);
   };
 
   return (
     <Box
+      ref={slideRef}
       display="flex"
       flexDirection="column"
       height="100%"
-      minHeight={0}
+      overflow="auto"
       bgcolor="black"
+      onClick={() => { if (showMore) setShowMore(false); }}
     >
+       <Box flex="0 0 auto"><Header /></Box>
+      <Box flex="0 0 auto"><ProgressHeader /></Box>
+
+      {step?.img && (
+        <ImageBox
+          ref={imageBoxRef}
+          imgSrc={step.img}
+          altText={user?.name}
+          lockedHeight={lockedImageHeight}
+        />
+      )}
+
       <Box flex="0 0 auto">
-        <ProgressHeader />
-      </Box>
-
-      <Box
-        flex="1 1 auto"
-        minHeight={0}
-        onClick={closeShowMore}
-      >
-        {step?.img && <ImageBox imgSrc={step.img} name={user?.name} />}
-
-        <Box mt={1} display="flex" flexDirection="column" gap={1} px={2}>
+        <Box mt={1} px={2} display="flex" flexDirection="column" gap={1}>
           {(user?.name || user?.age) && (
             <Box display="flex" alignItems="center" gap={1}>
               <AccountCircleIcon sx={{ color: "green", fontSize: 20 }} />
@@ -60,56 +92,46 @@ export default function SingleStepCard({ summary, user, step, isFirstStep }) {
             </Box>
           )}
 
-          <Box
-            display="flex"
-            alignItems="center"
-            justifyContent="space-between"
-          >
+          <Box display="flex" justifyContent="space-between" alignItems="center">
             {step?.location && (
               <Box display="flex" alignItems="center" gap={1}>
                 <LocationOnIcon sx={{ color: "green", fontSize: 16 }} />
-                <Typography color="#FFFFFF" fontSize={14}>
-                  {step.location}
-                </Typography>
+                <Typography color="#FFFFFF" fontSize={14}>{step.location}</Typography>
               </Box>
             )}
             {date && (
               <Box display="flex" alignItems="center" gap={1}>
                 <AccessTimeIcon sx={{ color: "green", fontSize: 16 }} />
-                <Typography fontSize={14} color="#FFFFFF">
-                  {date}
-                </Typography>
+                <Typography color="#FFFFFF" fontSize={14}>{date}</Typography>
               </Box>
             )}
           </Box>
         </Box>
 
         {step?.event && (
-          <Box px={2} mt={1} ref={contentRef}>
-            <Typography fontSize={14} color="#FFFFFF">
-              {showMore ? step.event : `${step.event.slice(0, 100)}...`}
+          <Box
+            ref={contentRef}
+            px={2}
+            mt={1}
+            sx={{
+              maxHeight: showMore ? "none" : 100,
+              overflow: "hidden"
+            }}
+          >
+            <Typography fontSize={14} color="#FFFFFF" whiteSpace="pre-line">
+              {showMore || !hasLongEvent ? step.event : `${previewText}...`}
             </Typography>
 
-            {step.event.length > 100 && (
+            {hasLongEvent && (
               <Button
-                onClick={toggleShowMore}
-                sx={{
-                  fontSize: 14,
-                  p: 0,
-                  color: "#FFFFFF",
-                  textTransform: "none",
-                }}
+                onClick={handleToggleShowMore}
+                sx={{ fontSize: 14, p: 0, color: "#FFFFFF", textTransform: "none" }}
               >
                 {showMore ? "See less" : "See more"}
               </Button>
             )}
           </Box>
         )}
-
-        <Box
-          className="bottom-ref-box"
-          sx={{ height: "2px", width: "100%" }}
-        />
       </Box>
     </Box>
   );

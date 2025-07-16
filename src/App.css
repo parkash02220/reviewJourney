@@ -1,5 +1,30 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
 
-body{
+body {
   font-family: 'Poppins', sans-serif;
+  margin: 0;
+  padding: 0;
 }
+
+.keen-slider {
+  overflow: hidden;
+}
+
+.keen-slider__slide {
+  height: 100dvh;
+  flex: 0 0 100%;
+  display: flex;
+  justify-content: center;
+}
+/* .shorts-container {
+  scroll-snap-type: y mandatory;
+  overflow-y: scroll;
+  height: 100dvh;
+  -webkit-overflow-scrolling: touch;
+}
+
+.shorts-inner-container > * {
+  scroll-snap-align: start;
+  height: 100dvh;
+  flex-shrink: 0;
+} */

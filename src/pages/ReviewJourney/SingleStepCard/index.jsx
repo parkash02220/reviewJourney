@@ -61,7 +61,6 @@ export default function SingleStepCard({ user, step }) {
       }, 10);
     });
   };
-
   return (
     <Box
       ref={cardRef}
@@ -74,10 +73,10 @@ export default function SingleStepCard({ user, step }) {
         if (showMore) setShowMore(false);
       }}
     >
-      <Box flex="0 0 auto">
+      <Box flexShrink={0}>
         <Header />
       </Box>
-      <Box flex="0 0 auto">
+      <Box flexShrink={0}>
         <ProgressHeader />
       </Box>
 
@@ -108,7 +107,7 @@ export default function SingleStepCard({ user, step }) {
         </ImageBox>
       )}
 
-      <Box flex="1 1 auto">
+      <Box flexShrink={0}>
         <Box
           ref={contentBoxRef}
           mt={1}

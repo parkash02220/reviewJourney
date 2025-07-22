@@ -112,7 +112,7 @@ export default function ReviewJourney() {
         <SwiperSlide key={idx}>
           <Box
             width="100%"
-            maxWidth={{ xs: "100%", sm: 500}}
+            maxWidth={{ xs: "100%", sm: "75%", md: "50%", lg: "33.33%" }}
             height="100%"
             mx="auto"
           >
